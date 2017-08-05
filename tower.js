@@ -318,9 +318,6 @@ var flowerInit = function() {
   var canvasContext = getCanvas(canvas);
   var flowerContext = new FlowerContext(world, canvasContext);
 
-  // Get rid of the tower game-specific chunks of text.
-  $('tower-controls').hide();
-
   // Start the process of shooting flares into the sky, and loop to both run the
   // physics simulation and to draw the animation frames.
   setTimeout(function(){ startFlower(flowerContext) }, 0);
