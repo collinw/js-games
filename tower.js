@@ -22,10 +22,14 @@ GameCanvas.prototype.clear = function() {
 function TowerContext(world, canvas) {
   this.world = world;
   this.canvas = canvas;
+  this.version = 0;
 }
 
 // Remove all current objects from the physics simulation.
 TowerContext.prototype.reset = function() {
+  // Stop any in-progress attacker.
+  this.version++;
+
   var b = this.world.m_bodyList;
   while (b) {
     var current = b;
@@ -245,7 +249,12 @@ var createShot = function(towerContext, start, radius) {
 	return towerContext.world.CreateBody(ballBd);
 };
 
-var fireCannon = function(towerContext, start, maxShots) {
+var fireCannon = function(towerContext, start, maxShots, version) {
+  // Stop firing if the user clicks "reset" mid-attack.
+  if (towerContext.version != version) {
+    return;
+  }
+
   var shot = createShot(towerContext, start, 5);
   var velocity = new b2Vec2(600, -300);
   velocity.Multiply(shot.GetMass());
@@ -260,7 +269,7 @@ var fireCannon = function(towerContext, start, maxShots) {
   
   // Fire the next shot after a 500ms delay.
   if (maxShots > 0) {
-    setTimeout(function() { fireCannon(towerContext, start, maxShots - 1) }, 500);
+    setTimeout(function() { fireCannon(towerContext, start, maxShots - 1, version) }, 500);
   }
 };
 
@@ -281,7 +290,7 @@ var deployAttacker = function(towerContext) {
   var turret = createTurret(towerContext, start);
   var maxShots = 20;
   // Fire the first shot after a 250 ms delay; this is less startling to the user.
-  setTimeout(function() { fireCannon(towerContext, start, maxShots) }, 250);
+  setTimeout(function() { fireCannon(towerContext, start, maxShots, towerContext.version) }, 250);
 };
 
 // FlowerContext inherits from TowerContext;
